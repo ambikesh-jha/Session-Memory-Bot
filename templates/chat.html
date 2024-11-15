@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Chatbot</title>
+    <title>Smart-bot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -107,6 +107,50 @@
         .loading span:nth-child(3) {
             animation-delay: 0.4s;
         }
+        .history-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+        .history-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .history-box {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+        }
+        .history-message {
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background-color: #e0f7fa;
+            color: #00796b;
+            font-size: 14px;
+        }
+        .history-message.user {
+            align-self: flex-start;
+            color: #004d40;
+            background-color: #b2dfdb;
+        }
+        .history-message.bot {
+            align-self: flex-end;
+            color: #00796b;
+            background-color: #80deea;
+        }
         @keyframes bounce {
             from {
                 transform: translateY(0);
@@ -119,7 +163,7 @@
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-title">Chat-Bot</div>
+        <div class="chat-title">Smart-Bot</div>
         <div class="chat-box" id="chatBox">
         </div>
         <div class="loading" id="loading" style="display: none;">
@@ -128,10 +172,14 @@
         <div class="input-container">
             <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="if(event.key === 'Enter') sendMessage()">
             <button onclick="sendMessage()">Send</button>
+            <button onclick="fetchHistory()">View History</button>
         </div>
     </div>
+    <div class="history-container" id="historyContainer" style="display: none;">
+        <div class="history-title">Chat History</div>
+        <div class="history-box" id="historyBox"></div>
+    </div>
     
-
     <script>
         async function sendMessage() {
             const userInput = document.getElementById("userInput").value.trim();
@@ -173,6 +221,49 @@
             // Clear input field and scroll to bottom
             chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        async function fetchHistory() {
+            const response = await fetch("/history");
+            const data = await response.json();
+
+            const chatBox = document.getElementById("chatBox");
+            chatBox.innerHTML = ""; // Clear current chat
+
+            data.forEach(chat => {
+                const chatMessage = document.createElement("div");
+                chatMessage.className = `chat-message ${chat.sender.toLowerCase()}`;
+                chatMessage.textContent = `${chat.sender}: ${chat.message}`;
+                chatBox.appendChild(chatMessage);
+            });
+
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function fetchHistory() {
+            const response = await fetch("/history");
+            const data = await response.json();
+
+            const historyContainer = document.getElementById("historyContainer");
+            const historyBox = document.getElementById("historyBox");
+
+            // Show the history container
+            historyContainer.style.display = "block";
+
+            // Clear existing history
+            historyBox.innerHTML = "";
+
+            data.forEach(chat => {
+                const historyMessage = document.createElement("div");
+                historyMessage.className = `history-message ${chat.sender.toLowerCase()}`;
+                historyMessage.textContent = `${chat.sender}: ${chat.message}`;
+                historyBox.appendChild(historyMessage);
+            });
+
+            // Scroll to bottom of history
+            historyBox.scrollTop = historyBox.scrollHeight;
+        }
     </script>
 </body>
 </html>
+
